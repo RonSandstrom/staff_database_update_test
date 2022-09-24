@@ -3,30 +3,31 @@ from threestep.database.c_table import Table
 from threestep.cache.c_singleton import Singleton
 from threestep.result.c_result import Result
 from threestep.std_logging.logs import logger
+from database.automation.c_sign_now_documents_table import SignNowDocument
 
 
 @Singleton
-class AutomationDatabaseTables(object):
+class AutomationDatabase(object):
 
     def __init__(self):
         self.automation = DatabaseConnect(application='automation', dictionary=True)
         self.documents_table: Table = self.automation.db.table(table_name='signnow_signed_documents', dictionary=True)
 
-    def show_result(result: Result = Result(-1)):
+    def show_result(self, label: str, result: Result = Result(-1)):
         if result.is_ok():
             for row in result.data:
                 s_row: SignNowDocument = SignNowDocument(row=row)
-                logger.info(s_row)
+                logger.info(f"[{label}] Located record for [{s_row.user_name}] doc id = [{s_row.document_id}]")
 
     def get_not_process_staff(self) -> Result:
         return self.documents_table.fetch_many(
             where="`processed_staff_database` = 'N'")
 
-    def get_w9_error_items(self) -> Result:
+    def get_staff_ach_documents(self) -> Result:
         return self.documents_table.fetch_many(
             where="`document_name` like 'Sub W9%' and `user_name` != 'ERROR' and `processed` = 'N'")
 
-    def get_ach_error_items(self) -> Result:
+    def get_company_ach_documents(self) -> Result:
         return self.documents_table.fetch_many(
             where="document_name ='Company SUB W-9_ACH' and `user_name` != 'ERROR' and `processed` = 'N'")
 
