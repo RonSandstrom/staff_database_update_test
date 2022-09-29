@@ -3,21 +3,26 @@ from threestep.database.c_table import Table
 from threestep.cache.c_singleton import Singleton
 from threestep.result.c_result import Result
 from threestep.std_logging.logs import logger
+from database.staff.c_master_list import MasterList
 
-from database.staff.c_staff_master_list_table import StaffMasterList
+class DataHelper:
+    """
+    list out the contents of any database type
+    """
+    def show_result(self, class_type,  label: str, result: Result = Result(-1)):
+        if result.is_ok():
+            for row in result.data:
+                s_row = class_type(row=row)
+                logger.info(f"[{label}] Located record for [{s_row.user_name}] doc id = [{s_row.document_id}]")
+
 
 
 @Singleton
-class StaffDatabase(object):
+class StaffDatabase(DataHelper):
     def __init__(self):
         self.staff = DatabaseConnect(application='staff', dictionary=True)
         self.master_list_table: Table = self.automation.db.table(table_name='master_list', dictionary=True)
 
-    def show_result(self, result: Result = Result(-1)):
-        if result.is_ok():
-            for row in result.data:
-                s_row: StaffMasterList = StaffMasterList(row=row)
-                logger.info(s_row)
 
     def get_staff_member(self, user_name) -> Result:
         first_name = ''

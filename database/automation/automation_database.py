@@ -3,21 +3,27 @@ from threestep.database.c_table import Table
 from threestep.cache.c_singleton import Singleton
 from threestep.result.c_result import Result
 from threestep.std_logging.logs import logger
-from database.automation.c_sign_now_documents_table import SignNowDocument
+
+class DataHelper:
+    """
+    list out the contents of any database type
+    """
+    def show_result(self, class_type,  label: str, result: Result = Result(-1)):
+        if result.is_ok():
+            for row in result.data:
+                s_row = class_type(row=row)
+                logger.info(f"[{label}] Located record for [{s_row.user_name}] doc id = [{s_row.document_id}]")
 
 
 @Singleton
-class AutomationDatabase(object):
+class AutomationDatabase(DataHelper):
 
     def __init__(self):
         self.automation = DatabaseConnect(application='automation', dictionary=True)
         self.documents_table: Table = self.automation.db.table(table_name='signnow_signed_documents', dictionary=True)
 
-    def show_result(self, label: str, result: Result = Result(-1)):
-        if result.is_ok():
-            for row in result.data:
-                s_row: SignNowDocument = SignNowDocument(row=row)
-                logger.info(f"[{label}] Located record for [{s_row.user_name}] doc id = [{s_row.document_id}]")
+    def fetch_all(self):
+        return self.documents_table.fetch_many(limit="10")
 
     def get_not_process_staff(self) -> Result:
         return self.documents_table.fetch_many(
