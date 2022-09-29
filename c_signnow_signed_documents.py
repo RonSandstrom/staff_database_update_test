@@ -2,7 +2,7 @@ from threestep.std_utility.c_datetime import DateTime
 from threestep.database.v2_c_database_operations import DatabaseOperations
 
 
-class SignNowDocument(DatabaseOperations):
+class SignnowSignedDocuments(DatabaseOperations):
     def __init__(self, row=None, t_tuple=None):
         super().__init__(_schema, _table, _field_map)
         self.document_id = None
